@@ -22,6 +22,7 @@
 
 # agent manager & local metadata
 .kilo/
+.cline/
 
 # misc
 .DS_Store
