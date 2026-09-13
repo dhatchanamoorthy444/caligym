@@ -140,10 +140,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error || !data?.user) return { success: false, error: friendlyAuthError(error?.message || '') };
-      const profile = await loadProfileFor(data.user.id);
+      let profile = await loadProfileFor(data.user.id);
       if (!profile) {
-        await supabase.auth.signOut();
-        return { success: false, error: 'Account exists but the profile record is missing. Please contact support — do not register again (your email is already taken).' };
+        // Self-heal for "stuck" accounts: users who registered while the
+        // profiles INSERT policy or handle_new_user() trigger was missing on
+        // the live database have an auth.users row but no profiles row. Now
+        // that they are authenticated (auth.uid() is set), insert the row so
+        // they can log in without contacting support.
+        const fallback = (email || data.user.email || '').split('@')[0]
+          .toLowerCase().replace(/[^a-z0-9_]/g, '_').slice(0, 20) || `user_${data.user.id.slice(0, 8)}`;
+        const { error: backfillError } = await supabase.from('profiles').upsert(
+          {
+            id: data.user.id,
+            username: fallback,
+            email: email || data.user.email || '',
+            name: fallback,
+            role: 'user',
+          },
+          { onConflict: 'id' },
+        );
+        if (backfillError) {
+          console.warn('Profile backfill failed:', backfillError.message);
+          await supabase.auth.signOut();
+          return {
+            success: false,
+            error:
+              'Account exists but the profile record is missing. The database is likely missing the "Users Insert Own Profile" RLS policy or the handle_new_user() trigger. Run supabase/fix-registration.sql in the Supabase SQL editor, then log in again.',
+          };
+        }
+        profile = await loadProfileFor(data.user.id);
+        if (!profile) {
+          await supabase.auth.signOut();
+          return { success: false, error: 'Account exists but the profile record could not be loaded. Please try again in a moment.' };
+        }
       }
       setUser(profile);
       return { success: true, role: profile.role };

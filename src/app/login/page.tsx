@@ -1,10 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../context/AuthContext';
 import { WorkoutMascot } from '../../components/WorkoutMascot';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/Card';
+import { Button } from '../../components/ui/Button';
+import { Input } from '../../components/ui/Input';
+import { Alert } from '../../components/ui/Alert';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,23 +18,25 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [honeypot, setHoneypot] = useState('');
-  const formStartTime = React.useRef<number>(Date.now());
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const formStartTime = React.useRef<number>(0);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setNotice('');
+    setIsSubmitting(true);
 
-    // Bot detection: honeypot field should be empty
     if (honeypot) {
       setError('Suspicious activity detected. Please try again.');
+      setIsSubmitting(false);
       return;
     }
 
-    // Bot detection: form submitted too quickly (bots fill instantly)
     const elapsed = Date.now() - formStartTime.current;
     if (elapsed < 2000) {
       setError('Request submitted too quickly. Please try again.');
+      setIsSubmitting(false);
       return;
     }
 
@@ -48,10 +54,12 @@ export default function LoginPage() {
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
       console.error('Login error:', err);
+    } finally {
+      setIsSubmitting(false);
     }
-  };
+  }, [emailOrUsername, password, honeypot, signIn, router]);
 
-  const handleForgotPassword = async () => {
+  const handleForgotPassword = useCallback(async () => {
     setError('');
     setNotice('');
     const value = (emailOrUsername || '').trim();
@@ -59,111 +67,139 @@ export default function LoginPage() {
       setError('Enter your email address first to receive a reset link.');
       return;
     }
-    const result = await resetPassword(value);
-    if (result.success) {
-      setNotice('Password reset link sent! Check your inbox.');
-    } else {
-      setError(result.error || 'Failed to send reset email.');
+    try {
+      const result = await resetPassword(value);
+      if (result.success) {
+        setNotice('Password reset link sent! Check your inbox.');
+      } else {
+        setError(result.error || 'Failed to send reset email.');
+      }
+    } catch {
+      setError('Failed to send reset email.');
     }
-  };
+  }, [emailOrUsername, resetPassword]);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
-      <div className="bg-slate-900 border border-slate-800 w-full max-w-md rounded-3xl p-8 space-y-6 shadow-2xl">
-
-        <div className="text-center space-y-2">
-          <div className="w-20 h-20 mx-auto">
+      <div className="w-full max-w-md space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="w-24 h-24 mx-auto">
             <WorkoutMascot exercise="pushup" size="lg" />
           </div>
-          <h1 className="text-2xl font-black text-white">Welcome to CaliGym</h1>
-          <p className="text-xs text-slate-400">Log in with your email or username and password</p>
+          <div>
+            <h1 className="text-3xl font-black text-white tracking-tight">Welcome to CaliGym</h1>
+            <p className="text-sm text-slate-400 mt-2">Log in with your email or username and password</p>
+          </div>
         </div>
 
+        {/* Status Alerts */}
         {error && (
-          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold">
+          <Alert variant="error" title="Sign In Failed">
             {error}
-          </div>
+          </Alert>
         )}
         {notice && (
-          <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold">
+          <Alert variant="success" title="Check Your Inbox">
             {notice}
-          </div>
+          </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">Email or Username</label>
-            <div className="relative">
-              <input
+        {/* Login Card */}
+        <Card variant="elevated" padding="xl" hover={false}>
+          <CardHeader>
+            <CardTitle>Sign In to Your Account</CardTitle>
+            <CardDescription>Access your workout plans, progress, and skill tree</CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <Input
+                label="Email or Username"
                 type="text"
                 required
                 autoComplete="username"
                 placeholder="you@example.com or alex_athlete"
                 value={emailOrUsername}
-                onChange={e => setEmailOrUsername(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+                onChange={(e) => setEmailOrUsername(e.target.value)}
+                disabled={isSubmitting || loading}
+                error={undefined}
               />
-            </div>
-          </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-1">
-              <label className="block text-xs font-semibold text-slate-400">Password</label>
-              <button
-                type="button"
-                onClick={handleForgotPassword}
-                className="text-xs text-amber-400 hover:underline font-semibold"
-              >
-                Forgot password?
-              </button>
-            </div>
-            <div className="relative">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-xs font-semibold text-slate-400">Password</label>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    disabled={isSubmitting || loading}
+                    className="text-xs text-amber-400 hover:underline font-semibold disabled:opacity-50"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+                <Input
+                  type="password"
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isSubmitting || loading}
+                  error={undefined}
+                />
+              </div>
+
               <input
-                type="password"
-                required
-                autoComplete="current-password"
-                placeholder="••••••••"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-4 pr-4 py-2.5 text-sm focus:border-amber-500 focus:outline-none"
+                type="text"
+                name="_gotcha"
+                tabIndex={-1}
+                autoComplete="new-password"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                className="absolute left-[-5000px] top-auto w-0 h-0 overflow-hidden"
+                aria-hidden="true"
               />
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                fullWidth
+                loading={isSubmitting || loading}
+                disabled={isSubmitting || loading}
+              >
+                {isSubmitting || loading ? 'Please wait...' : 'Sign In'}
+              </Button>
+            </form>
+          </CardContent>
+
+          <CardFooter>
+            <div className="text-center text-xs text-slate-400 w-full">
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="text-amber-400 font-bold hover:underline">
+                Create Account
+              </Link>
             </div>
-          </div>
+          </CardFooter>
+        </Card>
 
-          <input
-            type="text"
-            name="_gotcha"
-            tabIndex={-1}
-            autoComplete="new-password"
-            value={honeypot}
-            onChange={e => setHoneypot(e.target.value)}
-            className="absolute left-[-5000px] top-auto w-0 h-0 overflow-hidden"
-            aria-hidden="true"
-          />
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-black text-sm hover:opacity-90 transition-opacity shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span>{loading ? 'Please wait...' : 'Sign In'}</span>
-          </button>
-        </form>
-{!configured && (
-          <div className="text-xs text-slate-500 space-y-1">
-            <p className="text-center text-slate-400 text-xs opacity-60">
-              Supabase authentication is not configured yet.
-            </p>
-          </div>
-        )}
-
-        <div className="text-center text-xs text-slate-400 pt-2 border-t border-slate-800">
-          Don&apos;t have an account?{' '}
-          <Link href="/register" className="text-amber-400 font-bold hover:underline">
-            Create Account
-          </Link>
+        {/* Footer Info */}
+        <div className="text-center space-y-2">
+          <p className="text-xs text-slate-500">
+            Secure authentication powered by Supabase
+          </p>
+          {!configured && (
+            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
+              <p className="text-xs text-amber-400 font-semibold">
+                Supabase authentication is not configured yet.
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.
+              </p>
+            </div>
+          )}
         </div>
-
       </div>
     </div>
   );

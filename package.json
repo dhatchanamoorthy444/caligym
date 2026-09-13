@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "check:env": "node scripts/check-env.mjs",
+    "smoke:auth": "tsx scripts/auth-smoke.ts"
   },
   "dependencies": {
     "@google/genai": "^2.21.0",
