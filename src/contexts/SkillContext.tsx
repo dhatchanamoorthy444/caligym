@@ -370,9 +370,9 @@ export const SkillProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         newProgress.totalPracticeTime += duration;
 
         // Calculate XP based on duration and skill difficulty
-        const xpGain = Math.floor(duration * skill.level === 'foundation' ? 10 :
+        const xpGain = Math.floor(duration * (skill.level === 'foundation' ? 10 :
                                 skill.level === 'beginner' ? 15 :
-                                skill.level === 'intermediate' ? 20 : 25);
+                                skill.level === 'intermediate' ? 20 : 25));
         newProgress.progress = Math.min(100, (newProgress.progress || 0) + xpGain);
 
         if (value && unit) {
@@ -401,7 +401,7 @@ export const SkillProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // Find first unlocked but not mastered skill
     const unlockedButNotMastered = userProgress
-      .filter(p => p.isUnlocked && p.progress < 100)
+      .filter(p => p.progress < 100)
       .sort((a, b) => {
         const skillA = SKILLS_DATA.find(s => s.id === a.skillId);
         const skillB = SKILLS_DATA.find(s => s.id === b.skillId);

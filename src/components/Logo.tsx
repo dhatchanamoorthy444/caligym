@@ -18,9 +18,11 @@ export const Logo: React.FC<LogoProps> = ({ className = '', showText = true, siz
   return (
     <div className={`flex items-center gap-3 ${className}`}>
       <img
-        src="/logo.svg"
+        src="/watermarked_logo.png"
         alt="CaliGym Official Logo"
         className={`${sizeStyles[size]} logo-global object-contain`}
+        width="200"
+        height="100"
       />
       {showText && (
         <span className="font-extrabold text-xl tracking-tight whitespace-nowrap">

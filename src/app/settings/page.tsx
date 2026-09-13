@@ -7,11 +7,11 @@ import { useRouter } from 'next/navigation';
 
 export default function SettingsPage() {
   const { profile } = useCalisthenics();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const router = useRouter();
   const [notifications, setNotifications] = useState(true);
 
-  const handleLogout = async () => { await logout(); router.push('/login'); };
+  const handleLogout = async () => { await signOut(); router.push('/login'); };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 py-8 px-4 sm:px-6 lg:px-8">
