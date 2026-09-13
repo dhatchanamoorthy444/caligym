@@ -32,6 +32,27 @@ export function getSupabaseBrowserClient(): SupabaseClient {
   return cached;
 }
 /**
+ * Returns the specific Supabase env vars that are missing or still placeholders,
+ * so the UI can tell the user exactly what to fix instead of a generic message.
+ */
+export function getMissingSupabaseEnv(): string[] {
+  const missing: string[] = [];
+  const url = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
+  if (!url || !url.startsWith('http') || isPlaceholderCredential(url)) {
+    missing.push('NEXT_PUBLIC_SUPABASE_URL');
+  }
+  const key = (
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    ''
+  ).trim();
+  if (!key || isPlaceholderCredential(key)) {
+    missing.push('NEXT_PUBLIC_SUPABASE_ANON_KEY');
+  }
+  return missing;
+}
+
+/**
  * True when real Supabase credentials are present in the environment.
  * Never falls back to fake/demo credentials.
  */

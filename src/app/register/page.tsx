@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Alert } from '../../components/ui/Alert';
+import { getMissingSupabaseEnv } from '../../lib/supabase-browser';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -232,7 +233,8 @@ export default function RegisterPage() {
                 Supabase authentication is not configured yet.
               </p>
               <p className="text-xs text-slate-400 mt-1">
-                Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your environment.
+                Missing in your environment: {getMissingSupabaseEnv().join(', ')}.
+                Add them in Vercel → Settings → Environment Variables (Production), then redeploy.
               </p>
             </div>
           )}

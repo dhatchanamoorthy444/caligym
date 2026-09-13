@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from './ui/Card';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
@@ -20,23 +19,30 @@ export const AICoach: React.FC<AICoachProps> = ({
   defaultProvider = 'gemini',
   className = '',
 }) => {
-  const { user } = useAuth();
-  const [provider, setProvider] = useState<'gemini' | 'deepseek' | 'opencode'>(controlledProvider || defaultProvider);
+  const [provider, setProvider] = useState<'gemini' | 'deepseek' | 'opencode'>(() => controlledProvider || defaultProvider);
   const [prompt, setPrompt] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Use controlled value if provided, otherwise use internal state
+  const effectiveProvider = controlledProvider ?? provider;
+
+  // Sync internal state when controlledProvider changes (for uncontrolled mode)
   useEffect(() => {
-    if (controlledProvider) {
-      setProvider(controlledProvider);
+    if (controlledProvider === undefined) {
+      // Only update if we're in uncontrolled mode
+      // This effect runs when controlledProvider changes from defined to undefined
     }
   }, [controlledProvider]);
 
+  // Update internal state when controlledProvider is provided and we're switching to uncontrolled
   const handleProviderChange = useCallback((newProvider: 'gemini' | 'deepseek' | 'opencode') => {
-    setProvider(newProvider);
+    if (controlledProvider === undefined) {
+      setProvider(newProvider);
+    }
     onProviderChange?.(newProvider);
-  }, [onProviderChange]);
+  }, [controlledProvider, onProviderChange]);
 
   const handleSend = useCallback(async () => {
     if (!prompt.trim()) {
@@ -49,9 +55,9 @@ export const AICoach: React.FC<AICoachProps> = ({
     setResponse('');
 
     try {
-      const apiPath = provider === 'gemini' 
+      const apiPath = effectiveProvider === 'gemini' 
         ? '/api/chat' 
-        : provider === 'deepseek' 
+        : effectiveProvider === 'deepseek' 
           ? '/api/ai/deepseek' 
           : '/api/ai/opencode';
 
@@ -75,7 +81,7 @@ export const AICoach: React.FC<AICoachProps> = ({
     } finally {
       setLoading(false);
     }
-  }, [prompt, provider]);
+  }, [prompt, effectiveProvider]);
 
   const handleClear = useCallback(() => {
     setPrompt('');
@@ -110,7 +116,7 @@ export const AICoach: React.FC<AICoachProps> = ({
                 onClick={() => handleProviderChange(p)}
                 className={`
                   px-3 py-1.5 text-xs font-bold rounded-md transition-all capitalize
-                  ${provider === p 
+                  ${effectiveProvider === p 
                     ? 'bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/25' 
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
                   }
@@ -134,7 +140,7 @@ export const AICoach: React.FC<AICoachProps> = ({
           <div className="p-4 rounded-xl bg-slate-900/50 border border-slate-800">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2 h-2 rounded-full bg-amber-400" />
-              <span className="text-xs font-bold text-amber-400 capitalize">{provider} Coach</span>
+              <span className="text-xs font-bold text-amber-400 capitalize">{effectiveProvider} Coach</span>
             </div>
             <p className="text-sm text-slate-200 whitespace-pre-wrap leading-relaxed">
               {response}
