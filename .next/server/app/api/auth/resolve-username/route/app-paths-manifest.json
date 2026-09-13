@@ -1,0 +1,3 @@
+{
+  "/api/auth/resolve-username/route": "app/api/auth/resolve-username/route.js"
+}
