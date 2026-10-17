@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — CaliGym</title>
+  <link rel="stylesheet" href="../styles/globals.css">
+  <style>
+    .dashboard-grid { display:grid; grid-template-columns:1fr; gap:1.5rem; }
+    @media(min-width:1024px){ .dashboard-grid { grid-template-columns: 280px 1fr; } }
+    .sidebar { display:flex; flex-direction:column; gap:1.5rem; }
+    .stats-strip { display:grid; grid-template-columns: repeat(2,1fr); gap:1rem; }
+    @media(min-width:640px){ .stats-strip { grid-template-columns: repeat(4,1fr); } }
+    .stat-card { border-radius:var(--radius-8); padding:1rem; background:var(--color-navy); border:1px solid #1e293b; }
+    .heatmap { display:grid; grid-template-columns: repeat(7,1fr); gap:3px; }
+    .day-cell { aspect-ratio:1; border-radius:2px; background:#1e293b; }
+    .day-cell.low { background:#7c3aed44; }
+    .day-cell.med { background:#7c3aed88; }
+    .day-cell.high { background:var(--color-orange); }
+    .ai-card { border-top:2px solid var(--color-emerald); }
+    .rec-card { background:#0F1419; border:1px solid #1e293b; border-radius:var(--radius-md); padding:1rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; align-items:center; }
+    .log-form input, .log-form select, .log-form textarea { width:100%; padding:0.6rem 0.75rem; border:1px solid #1e293b; border-radius:var(--radius-sm); background:#0F1419; color:var(--color-offwhite); font-family:'Lexend',sans-serif; font-size:0.9rem; margin-bottom:0.75rem; }
+  </style>
+</head>
+<body>
+
+<nav style="padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b;">
+  <a href="/" style="font-family:'Sora',sans-serif; font-weight:700; font-size:1.3rem; color:var(--color-offwhite);">
+    Cali<span style="color:var(--color-orange);">Gym</span>
+  </a>
+  <div style="display:flex; gap:1.5rem; align-items:center;">
+    <a href="/skills" style="color:var(--color-slate); font-size:0.9rem;">Skills</a>
+    <a href="/settings" style="color:var(--color-slate); font-size:0.9rem;">Settings</a>
+    <a href="#" style="color:var(--color-slate); font-size:0.9rem;">Log out</a>
+  </div>
+</nav>
+
+<main class="section-padding" style="max-width:1200px; margin:0 auto;">
+  <h1 style="font-size:1.75rem; margin-bottom:2rem;">Dashboard</h1>
+
+  <div class="dashboard-grid">
+    <!-- SIDEBAR: profile + stats -->
+    <aside class="sidebar">
+      <div class="card" style="text-align:center; border-radius:var(--radius-lg);">
+        <div style="width:72px; height:72px; border-radius:50%; background:var(--color-orange); display:flex; align-items:center; justify-content:center; font-size:1.5rem; font-weight:700; margin:0 auto 0.75rem; color:#fff;" aria-label="User avatar initials">MR</div>
+        <div style="font-weight:600; margin-bottom:0.25rem;">Marcus R.</div>
+        <div style="font-size:0.85rem; color:var(--color-slate); margin-bottom:1rem;">Intermediate level</div>
+        <button class="btn btn-secondary" style="font-size:0.85rem; padding:0.5rem 1rem; width:100%;">Edit Profile</button>
+      </div>
+
+      <div class="stats-strip" style="grid-template-columns:1fr 1fr;">
+        <div class="stat-card">
+          <div class="skeleton skeleton-text" style="width:60%; margin-bottom:0.5rem;" aria-hidden="true"></div>
+          <div style="font-size:1.5rem; font-weight:700;">47</div>
+          <div style="font-size:0.75rem; color:var(--color-slate);">Workouts</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size:1.5rem; font-weight:700; color:var(--color-orange);">20</div>
+          <div style="font-size:0.75rem; color:var(--color-slate);">Pull-up PR</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size:1.5rem; font-weight:700; color:var(--color-emerald);">12</div>
+          <div style="font-size:0.75rem; color:var(--color-slate);">Skills unlocked</div>
+        </div>
+        <div class="stat-card">
+          <div style="font-size:1.5rem; font-weight:700;">90</div>
+          <div style="font-size:0.75rem; color:var(--color-slate);">Days streak</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div style="display:flex; flex-direction:column; gap:1.5rem;">
+
+      <!-- Progress chart (Chart.js placeholder) -->
+      <div class="card" style="border-radius:var(--radius-lg);">
+        <h2 style="font-size:1rem; margin-bottom:1rem;">Pull-up Progress (Last 30 Days)</h2>
+        <div style="background:#0F1419; border:1px solid #1e293b; border-radius:var(--radius-sm); height:180px; display:flex; align-items:center; justify-content:center; color:var(--color-slate);" role="img" aria-label="Line chart showing pull-up progress from 8 reps to 20 reps over 30 days">
+          [Chart.js canvas — Pull-up max reps over 30 days]
+        </div>
+      </div>
+
+      <!-- AI recommendations -->
+      <div class="card ai-card" style="border-radius:var(--radius-lg);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:1rem;">
+          <h2 style="font-size:1rem;">AI Recommendations</h2>
+          <span style="font-size:0.75rem; color:var(--color-emerald);">Updated today</span>
+        </div>
+
+        <!-- Skeleton loading state -->
+        <div id="recs-loading" style="display:none;">
+          <div class="skeleton skeleton-card" style="height:5rem; margin-bottom:0.75rem;"></div>
+          <div class="skeleton skeleton-card" style="height:5rem; margin-bottom:0.75rem;"></div>
+        </div>
+
+        <div id="recs-content">
+          <div class="rec-card">
+            <div>
+              <div style="font-weight:600; font-size:0.9rem;">Pull-up Volume Day</div>
+              <div style="color:var(--color-slate); font-size:0.82rem; margin-top:0.2rem;">5 sets x 5 reps at 80% effort</div>
+            </div>
+            <button class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.8rem;">Start</button>
+          </div>
+          <div class="rec-card">
+            <div>
+              <div style="font-weight:600; font-size:0.9rem;">Core Progression</div>
+              <div style="color:var(--color-slate); font-size:0.82rem; margin-top:0.2rem;">Hollow body hold + L-sit 3 x 20s</div>
+            </div>
+            <button class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.8rem;">Start</button>
+          </div>
+          <div class="rec-card">
+            <div>
+              <div style="font-weight:600; font-size:0.9rem;">Handstand Practice</div>
+              <div style="color:var(--color-slate); font-size:0.82rem; margin-top:0.2rem;">Chest-to-wall 5 x 30s holds</div>
+            </div>
+            <button class="btn btn-primary" style="padding:0.4rem 0.9rem; font-size:0.8rem;">Start</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workout log form -->
+      <div class="card" style="border-radius:var(--radius-lg);">
+        <h2 style="font-size:1rem; margin-bottom:1rem;">Log a Workout</h2>
+        <form class="log-form" onsubmit="handleLogSubmit(event)">
+          <label for="log-exercise" style="font-size:0.85rem; color:var(--color-slate);">Exercise</label>
+          <select id="log-exercise">
+            <option>Pull-ups</option>
+            <option>Push-ups</option>
+            <option>Squats</option>
+            <option>Plank</option>
+            <option>Dips</option>
+          </select>
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.75rem;">
+            <div>
+              <label for="log-sets" style="font-size:0.85rem; color:var(--color-slate);">Sets</label>
+              <input type="number" id="log-sets" min="1" max="20" value="3">
+            </div>
+            <div>
+              <label for="log-reps" style="font-size:0.85rem; color:var(--color-slate);">Reps</label>
+              <input type="number" id="log-reps" min="1" max="200" value="8">
+            </div>
+            <div>
+              <label for="log-duration" style="font-size:0.85rem; color:var(--color-slate);">Duration (min)</label>
+              <input type="number" id="log-duration" min="1" max="240" value="20">
+            </div>
+          </div>
+          <label for="log-notes" style="font-size:0.85rem; color:var(--color-slate);">Notes</label>
+          <textarea id="log-notes" rows="2" placeholder="Optional notes..."></textarea>
+          <button type="submit" class="btn btn-primary" style="font-size:0.9rem; padding:0.65rem 1.5rem;">Save Workout</button>
+        </form>
+      </div>
+
+      <!-- Workout frequency heatmap -->
+      <div class="card" style="border-radius:var(--radius-lg);">
+        <h2 style="font-size:1rem; margin-bottom:1rem;">Workout Frequency</h2>
+        <p style="font-size:0.8rem; color:var(--color-slate); margin-bottom:0.75rem;">Last 12 weeks</p>
+        <div class="heatmap" role="img" aria-label="Workout frequency heatmap for the last 12 weeks" style="grid-template-columns: repeat(12,1fr); gap:4px;">
+          <!-- 84 day cells, colored by frequency. This is a visual placeholder. -->
+          <div class="day-cell" title="Week 1, Mon"></div><div class="day-cell low" title="Week 1, Tue"></div><div class="day-cell" title="Week 1, Wed"></div><div class="day-cell high" title="Week 1, Thu"></div><div class="day-cell" title="Week 1, Fri"></div><div class="day-cell med" title="Week 1, Sat"></div><div class="day-cell" title="Week 1, Sun"></div>
+          <div class="day-cell med"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell low"></div><div class="day-cell high"></div><div class="day-cell"></div>
+          <div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell med"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div>
+          <div class="day-cell low"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell med"></div>
+          <div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell low"></div><div class="day-cell"></div>
+          <div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell med"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div>
+          <div class="day-cell"></div><div class="day-cell med"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell low"></div>
+          <div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell med"></div><div class="day-cell high"></div><div class="day-cell"></div>
+          <div class="day-cell"></div><div class="day-cell low"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div>
+          <div class="day-cell med"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell"></div>
+          <div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell med"></div><div class="day-cell high"></div><div class="day-cell"></div>
+          <div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell high"></div><div class="day-cell"></div><div class="day-cell high"></div><div class="day-cell high"></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.75rem; font-size:0.75rem; color:var(--color-slate);">
+          <span>Less</span>
+          <div class="day-cell" style="width:12px; height:12px;"></div>
+          <div class="day-cell low" style="width:12px; height:12px;"></div>
+          <div class="day-cell med" style="width:12px; height:12px;"></div>
+          <div class="day-cell high" style="width:12px; height:12px;"></div>
+          <span>More</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+function handleLogSubmit(e) {
+  e.preventDefault();
+  var exercise = document.getElementById('log-exercise').value;
+  var sets = document.getElementById('log-sets').value;
+  var reps = document.getElementById('log-reps').value;
+  // Simple client-side validation: warn if reps seem unrealistic
+  if (parseInt(reps) > 100) {
+    alert('Warning: ' + reps + ' reps per set is very high. Please double-check your entry before saving.');
+    return;
+  }
+  alert('Workout logged: ' + sets + ' x ' + reps + ' ' + exercise);
+}
+</script>
+</body>
+</html>

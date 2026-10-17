@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="CaliGym: Evidence-based calisthenics coaching with AI-powered progression tracking. Master bodyweight skills in 90 days.">
+  <title>CaliGym — Bodyweight Mastery with AI Coaching</title>
+  <link rel="stylesheet" href="../styles/globals.css">
+  <style>
+    /* Page-specific layout (supplements globals.css) */
+    .hero { display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: center; min-height: 80vh; }
+    @media(min-width:768px){ .hero { grid-template-columns: 2fr 3fr; } }
+    .hero-visual { background: var(--color-navy); border-radius: var(--radius-lg); aspect-ratio: 16/9; display:flex; align-items:center; justify-content:center; color:var(--color-slate); font-family:'Sora',sans-serif; border:1px solid #1e293b; }
+    .skills-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media(min-width:768px){ .skills-grid { grid-template-columns: repeat(4,1fr); } }
+    .skill-pullups { grid-column: span 2; grid-row: span 2; }
+    .skill-pushups { grid-column: span 2; }
+    .skill-handstand { grid-column: 1/-1; }
+    .problem-solution { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+    @media(min-width:768px){ .problem-solution { grid-template-columns: 1fr 1fr; } }
+    .demo-canvas { background: var(--color-navy); border:1px solid #1e293b; border-radius: var(--radius-lg); min-height: 400px; display:flex; flex-direction:column; align-items:center; justify-content:center; color: var(--color-slate); }
+    .pricing-cards { display: grid; grid-template-columns: 1fr; gap: 2rem; max-width: 700px; margin: 0 auto; }
+    @media(min-width:640px){ .pricing-cards { grid-template-columns: 1fr 1fr; } }
+    .comparison-table { display: none; max-width: 700px; margin: 2rem auto 0; }
+    .comparison-table.open { display: block; }
+    .comparison-table table { width:100%; border-collapse:collapse; }
+    .comparison-table th, .comparison-table td { padding: 0.75rem 1rem; text-align:left; border-bottom:1px solid #1e293b; font-size:0.9rem; }
+    .comparison-table th { color: var(--color-offwhite); font-family:'Sora',sans-serif; }
+    .comparison-table td { color: var(--color-slate); }
+    .testimonials-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; }
+    @media(min-width:768px){ .testimonials-grid { grid-template-columns: 1fr 1fr; } }
+    @media(min-width:1024px){ .testimonials-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    .faq-item { border-bottom:1px solid #1e293b; }
+    .faq-question { width:100%; display:flex; justify-content:space-between; align-items:center; padding:1rem 0; background:none; border:none; color:var(--color-offwhite); font-family:'Sora',sans-serif; font-size:1rem; font-weight:600; cursor:pointer; text-align:left; }
+    .faq-answer { max-height:0; overflow:hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+    .faq-answer.open { max-height: 300px; padding-bottom:1rem; }
+    .faq-answer p { color: var(--color-slate); font-size:0.95rem; line-height:1.7; }
+    .footer-grid { display: grid; grid-template-columns:1fr; gap:2rem; }
+    @media(min-width:768px){ .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; } }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center; }
+    .modal-overlay.hidden { display:none; }
+    .modal-box { background:var(--color-navy); border:1px solid #1e293b; border-radius:var(--radius-lg); padding:2rem; max-width:420px; text-align:center; }
+    .verified-badge { display:inline-flex; align-items:center; gap:0.25rem; color:var(--color-emerald); font-size:0.8rem; }
+    .verified-badge svg { width:14px; height:14px; }
+    .feature-check { color: var(--color-orange); }
+    .feature-no { color: #475569; }
+    .consent-row { display:flex; align-items:flex-start; gap:0.5rem; margin-top:0.5rem; }
+    .consent-row input[type="checkbox"] { margin-top:0.2rem; accent-color:var(--color-orange); }
+    .consent-row label { font-size:0.85rem; color:var(--color-slate); }
+  </style>
+</head>
+<body>
+
+<!-- ==================== AGE VERIFICATION MODAL ==================== -->
+<div class="modal-overlay" id="age-modal">
+  <div class="modal-box slide-up">
+    <h2 style="margin-bottom:1rem;">Age Verification</h2>
+    <p style="color:var(--color-slate); margin-bottom:1.5rem;">By accessing CaliGym, you confirm you are 18 years or older.</p>
+    <div style="display:flex; gap:1rem; justify-content:center;">
+      <button class="btn btn-primary" onclick="confirmAge()">I Confirm</button>
+      <button class="btn btn-secondary" onclick="window.location.href='https://www.google.com'">Leave</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== NAVIGATION ==================== -->
+<nav style="padding:1rem 2rem; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #1e293b;">
+  <a href="/" style="font-family:'Sora',sans-serif; font-weight:700; font-size:1.3rem; color:var(--color-offwhite);">
+    Cali<span style="color:var(--color-orange);">Gym</span>
+  </a>
+  <div style="display:flex; gap:1.5rem; align-items:center;">
+    <a href="/skills" style="color:var(--color-slate); font-size:0.9rem;">Skills</a>
+    <a href="/dashboard" style="color:var(--color-slate); font-size:0.9rem;">Dashboard</a>
+    <a href="#pricing" style="color:var(--color-slate); font-size:0.9rem;">Pricing</a>
+    <a href="#" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">Start Free Trial</a>
+  </div>
+</nav>
+
+<!-- ==================== HERO SECTION ==================== -->
+<section class="section-padding noise-bg">
+  <div class="hero" style="max-width:1200px; margin:0 auto;">
+    <div class="slide-up">
+      <h1 style="font-size:clamp(2rem,5vw,3.25rem); margin-bottom:1rem;">
+        Master Bodyweight Mastery in 90 Days
+      </h1>
+      <p style="color:var(--color-slate); font-size:1.1rem; margin-bottom:2rem; max-width:500px;">
+        Evidence-based calisthenics progression with AI coaching. Track your skills, unlock new exercises, and train with confidence.
+      </p>
+      <a href="#pricing" class="btn btn-primary" style="font-size:1rem; padding:0.85rem 2rem;">
+        Start Free Trial
+      </a>
+    </div>
+    <div class="hero-visual" role="img" aria-label="Athlete performing a pull-up exercise demonstration">
+      <!-- Replace with autoplay video: <video src="/assets/hero.mp4" autoplay muted loop playsinline></video> -->
+      <span>[Autoplay video placeholder: athlete performing pull-ups]</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PROBLEM / SOLUTION ==================== -->
+<section class="section-padding" style="background:var(--color-navy);">
+  <div class="problem-solution" style="max-width:1200px; margin:0 auto;">
+    <div style="display:flex; align-items:center; justify-content:center;">
+      <div class="card" style="width:100%; min-height:250px; display:flex; align-items:center; justify-content:center; color:var(--color-slate);">
+        <!-- Replace with illustration -->
+        <span>[Illustration: athlete looking for guidance]</span>
+      </div>
+    </div>
+    <div>
+      <h2 style="font-size:1.75rem; margin-bottom:1.5rem;">Why most people plateau</h2>
+      <ul class="list-arrows" style="list-style:none; display:flex; flex-direction:column; gap:1rem;">
+        <li style="color:var(--color-offwhite); font-size:1rem;">
+          Structured progressions backed by exercise science, not guesswork
+        </li>
+        <li style="color:var(--color-offwhite); font-size:1rem;">
+          AI coaching that adapts to your current level and movement patterns
+        </li>
+        <li style="color:var(--color-offwhite); font-size:1rem;">
+          Skill-tree system that keeps you motivated with clear, achievable milestones
+        </li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== SKILLS SHOWCASE (Asymmetric grid) ==================== -->
+<section class="section-padding" id="skills">
+  <div style="max-width:1200px; margin:0 auto;">
+    <h2 style="font-size:2rem; margin-bottom:2rem; text-align:center;">Build Real Strength, Step by Step</h2>
+    <div class="skills-grid">
+      <div class="card card-accent skill-pullups" role="article">
+        <img src="/images/placeholder-pullup.svg" alt="Athlete performing a strict pull-up with proper form" style="width:100%; border-radius:var(--radius-sm); margin-bottom:1rem; background:#1e293b; min-height:200px;" loading="lazy">
+        <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">Pull-ups</h3>
+        <p style="color:var(--color-slate);">From dead hang to weighted pull-ups. 5 progression levels.</p>
+      </div>
+      <div class="card card-accent skill-pushups" role="article">
+        <img src="/images/placeholder-pushup.svg" alt="Athlete performing a push-up with correct hand placement" style="width:100%; border-radius:var(--radius-sm); margin-bottom:1rem; background:#1e293b; min-height:100px;" loading="lazy">
+        <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Push-ups</h3>
+        <p style="color:var(--color-slate);">Wall to planche push-up. 6 levels.</p>
+      </div>
+      <div class="card card-accent skill-pushups" role="article">
+        <img src="/images/placeholder-squat.svg" alt="Athlete performing a pistol squat with controlled descent" style="width:100%; border-radius:var(--radius-sm); margin-bottom:1rem; background:#1e293b; min-height:100px;" loading="lazy">
+        <h3 style="font-size:1.1rem; margin-bottom:0.5rem;">Squats</h3>
+        <p style="color:var(--color-slate);">Air squat to pistol. 4 levels.</p>
+      </div>
+      <div class="card card-accent skill-handstand" role="article">
+        <img src="/images/placeholder-handstand.svg" alt="Athlete holding a freestanding handstand with straight body line" style="width:100%; border-radius:var(--radius-sm); margin-bottom:1rem; background:#1e293b; min-height:120px;" loading="lazy">
+        <h3 style="font-size:1.3rem; margin-bottom:0.5rem;">Handstand</h3>
+        <p style="color:var(--color-slate);">Wall-assisted to freestanding handstand push-ups. The ultimate upper-body skill.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== INTERACTIVE DEMO (Three.js placeholder) ==================== -->
+<section class="section-padding" style="background:var(--color-navy);">
+  <div style="max-width:900px; margin:0 auto; text-align:center;">
+    <h2 style="font-size:1.75rem; margin-bottom:1rem;">Interactive Exercise Demo</h2>
+    <p style="color:var(--color-slate); margin-bottom:2rem;">Explore form and muscle activation in 3D</p>
+    <div class="demo-canvas" id="three-canvas" role="img" aria-label="Interactive 3D model of an athlete performing a pull-up. Rotate and zoom to explore muscle activation.">
+      <span>[Three.js canvas loads here]</span>
+      <span style="font-size:0.85rem; margin-top:0.5rem;">Rotate and zoom to explore</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TESTIMONIALS ==================== -->
+<section class="section-padding">
+  <div style="max-width:1200px; margin:0 auto;">
+    <h2 style="font-size:1.75rem; margin-bottom:0.5rem; text-align:center;">Real Results from Real People</h2>
+    <p style="text-align:center; color:var(--color-slate); font-size:0.85rem; margin-bottom:2rem;">
+      All testimonials are from verified users who consented to share their progress.
+    </p>
+    <div class="testimonials-grid">
+
+      <div class="card" style="border-radius:var(--radius-lg);">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+          <div style="width:40px; height:40px; border-radius:50%; background:var(--color-slate); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem;">MR</div>
+          <div>
+            <div style="font-weight:600; font-size:0.95rem;">Marcus R.</div>
+            <span class="verified-badge">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              Verified user
+            </span>
+          </div>
+        </div>
+        <p style="color:var(--color-offwhite); font-size:0.9rem; margin-bottom:0.75rem;">
+          "Went from 0 pull-ups to 20 strict in 12 weeks following the progression system. The AI form feedback caught details I was missing."
+        </p>
+        <p style="color:var(--color-slate); font-size:0.8rem;">Progress: 0 to 20 pull-ups. Joined March 2026.</p>
+      </div>
+
+      <div class="card" style="border-radius:var(--radius-lg);">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+          <div style="width:40px; height:40px; border-radius:50%; background:var(--color-emerald); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; color:#0F172A;">SL</div>
+          <div>
+            <div style="font-weight:600; font-size:0.95rem;">Sadie L.</div>
+            <span class="verified-badge">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              Verified user
+            </span>
+          </div>
+        </div>
+        <p style="color:var(--color-offwhite); font-size:0.9rem; margin-bottom:0.75rem;">
+          "The skill tree kept me accountable. I unlocked my first muscle-up after 6 months of structured training."
+        </p>
+        <p style="color:var(--color-slate); font-size:0.8rem;">Progress: Beginner to muscle-up. Joined January 2026.</p>
+      </div>
+
+      <div class="card" style="border-radius:var(--radius-lg);">
+        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+          <div style="width:40px; height:40px; border-radius:50%; background:var(--color-orange); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; color:#fff;">JD</div>
+          <div>
+            <div style="font-weight:600; font-size:0.95rem;">Jordan D.</div>
+            <span class="verified-badge">
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+              Verified user
+            </span>
+          </div>
+        </div>
+        <p style="color:var(--color-offwhite); font-size:0.9rem; margin-bottom:0.75rem;">
+          "Clear progressions, no gimmicks. The freestanding handstand program is the most logical one I have found."
+        </p>
+        <p style="color:var(--color-slate); font-size:0.8rem;">Joined May 2026.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PRICING ==================== -->
+<section class="section-padding" id="pricing" style="background:var(--color-navy);">
+  <div style="max-width:900px; margin:0 auto; text-align:center;">
+    <h2 style="font-size:1.75rem; margin-bottom:0.5rem;">Straightforward Pricing</h2>
+    <p style="color:var(--color-slate); margin-bottom:1.5rem;">No hidden fees. Cancel anytime.</p>
+
+    <div class="pricing-toggle" style="margin-bottom:2rem;">
+      <button class="active" id="toggle-monthly" onclick="setPricing('monthly')">Monthly</button>
+      <button id="toggle-annual" onclick="setPricing('annual')">Annual</button>
+    </div>
+
+    <div class="pricing-cards">
+      <!-- Coach plan -->
+      <div class="card" style="border-radius:var(--radius-lg); text-align:left;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <h3 style="font-size:1.2rem;">Coach</h3>
+          <span style="background:#1e293b; color:var(--color-orange); padding:0.2rem 0.6rem; border-radius:999px; font-size:0.75rem; font-weight:600;">POPULAR</span>
+        </div>
+        <p style="font-size:2rem; font-weight:700; margin:1rem 0;" id="price-coach">$9.99<span style="font-size:0.9rem; color:var(--color-slate); font-weight:400;">/mo</span></p>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.5rem;">
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> All beginner and intermediate skills
+          </li>
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> AI coaching feedback
+          </li>
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> Progress tracking dashboard
+          </li>
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> Email support
+          </li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width:100%;">Choose Coach</a>
+      </div>
+      <!-- Master plan -->
+      <div class="card card-accent" style="border-radius:var(--radius-lg); text-align:left;">
+        <h3 style="font-size:1.2rem;">Master</h3>
+        <p style="font-size:2rem; font-weight:700; margin:1rem 0;" id="price-master">$19.99<span style="font-size:0.9rem; color:var(--color-slate); font-weight:400;">/mo</span></p>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:0.6rem; margin-bottom:1.5rem;">
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> Everything in Coach
+          </li>
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> Advanced skills (muscle-up, planche)
+          </li>
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> 3D interactive exercise demos
+          </li>
+          <li style="font-size:0.9rem; color:var(--color-offwhite);">
+            <span class="feature-check" style="margin-right:0.4rem;">&#10004;</span> Priority coaching response
+          </li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width:100%;">Choose Master</a>
+      </div>
+    </div>
+
+    <button onclick="toggleComparison()" style="margin-top:2rem; background:none; border:none; color:var(--color-orange); cursor:pointer; font-size:0.9rem; font-family:'Lexend',sans-serif;">
+      Compare plans in detail
+    </button>
+
+    <div class="comparison-table" id="comparison-table">
+      <table>
+        <thead><tr><th>Feature</th><th>Coach</th><th>Master</th></tr></thead>
+        <tbody>
+          <tr><td>Beginner skills</td><td class="feature-check">&#10004;</td><td class="feature-check">&#10004;</td></tr>
+          <tr><td>Intermediate skills</td><td class="feature-check">&#10004;</td><td class="feature-check">&#10004;</td></tr>
+          <tr><td>Advanced skills</td><td class="feature-no">&#x2014;</td><td class="feature-check">&#10004;</td></tr>
+          <tr><td>AI coaching</td><td class="feature-check">&#10004;</td><td class="feature-check">&#10004;</td></tr>
+          <tr><td>3D demos</td><td class="feature-no">&#x2014;</td><td class="feature-check">&#10004;</td></tr>
+          <tr><td>Priority support</td><td class="feature-no">&#x2014;</td><td class="feature-check">&#10004;</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== FAQ ==================== -->
+<section class="section-padding">
+  <div style="max-width:700px; margin:0 auto;">
+    <h2 style="font-size:1.75rem; margin-bottom:2rem; text-align:center;">Frequently Asked Questions</h2>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+        What fitness level do I need to start?
+        <span aria-hidden="true" style="font-size:1.2rem; transition:transform 0.3s;">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>CaliGym is designed for all levels. Beginner skills start with wall push-ups and assisted squats. The AI coaching adapts recommendations to your current ability, so you always train at the right intensity.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+        How does the AI coaching work?
+        <span aria-hidden="true" style="font-size:1.2rem; transition:transform 0.3s;">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>After each workout log, our AI reviews your rep counts, session frequency, and self-reported difficulty. It then suggests whether to progress, maintain, or deload for the next session. Recommendations are evidence-based and personalized.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+        Can I cancel my subscription?
+        <span aria-hidden="true" style="font-size:1.2rem; transition:transform 0.3s;">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>Yes, cancel at any time from your Settings page. You will retain access until the end of your billing period. See our <a href="/refund">refund policy</a> for details on our 14-day money-back guarantee.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+        Do I need equipment?
+        <span aria-hidden="true" style="font-size:1.2rem; transition:transform 0.3s;">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>Most beginner and intermediate exercises require no equipment. For pull-ups and dips, you will need a pull-up bar and parallel bars (or sturdy furniture). The skill pages note equipment requirements for each exercise.</p>
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <button class="faq-question" onclick="toggleFaq(this)" aria-expanded="false">
+        How is my data handled?
+        <span aria-hidden="true" style="font-size:1.2rem; transition:transform 0.3s;">+</span>
+      </button>
+      <div class="faq-answer">
+        <p>We collect only what is necessary: email, name, fitness level, and age. Your data is stored securely and never sold. You can request full data deletion at any time. See our <a href="/privacy">privacy policy</a> for complete details.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ==================== FOOTER ==================== -->
+<footer class="section-padding" style="background:var(--color-navy); border-top:1px solid #1e293b;">
+  <div style="max-width:1200px; margin:0 auto;">
+    <div class="footer-grid">
+      <div>
+        <div style="font-family:'Sora',sans-serif; font-weight:700; font-size:1.2rem; margin-bottom:0.75rem;">
+          Cali<span style="color:var(--color-orange);">Gym</span>
+        </div>
+        <p style="font-size:0.85rem; color:var(--color-slate); margin-bottom:0.5rem;">CaliGym LLC</p>
+        <p style="font-size:0.85rem; color:var(--color-slate); margin-bottom:0.5rem;">123 Fitness Ave, Austin, TX 78701</p>
+        <p style="font-size:0.85rem; color:var(--color-slate); margin-bottom:0.5rem;">Phone: <a href="tel:+15125550142">(512) 555-0142</a></p>
+        <p style="font-size:0.85rem; color:var(--color-slate);">Email: <a href="mailto:support@caligym.io">support@caligym.io</a></p>
+      </div>
+      <div>
+        <h4 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; color:var(--color-offwhite);">Legal</h4>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem;">
+          <li><a href="/privacy" style="font-size:0.85rem; color:var(--color-slate);">Privacy Policy</a></li>
+          <li><a href="/terms" style="font-size:0.85rem; color:var(--color-slate);">Terms of Service</a></li>
+          <li><a href="/refund" style="font-size:0.85rem; color:var(--color-slate);">Refund Policy</a></li>
+          <li><a href="/cookies" style="font-size:0.85rem; color:var(--color-slate);">Cookie Policy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; color:var(--color-offwhite);">Product</h4>
+        <ul style="list-style:none; display:flex; flex-direction:column; gap:0.5rem;">
+          <li><a href="/skills" style="font-size:0.85rem; color:var(--color-slate);">Skills</a></li>
+          <li><a href="/dashboard" style="font-size:0.85rem; color:var(--color-slate);">Dashboard</a></li>
+          <li><a href="/settings" style="font-size:0.85rem; color:var(--color-slate);">Settings</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; color:var(--color-offwhite);">Stay Updated</h4>
+        <form onsubmit="handleEmailSignup(event)" style="display:flex; flex-direction:column; gap:0.5rem;">
+          <input type="email" placeholder="Your email" required aria-label="Email address for newsletter" style="padding:0.5rem; border:1px solid #1e293b; border-radius:var(--radius-sm); background:#0F1419; color:var(--color-offwhite); font-size:0.9rem;">
+          <div class="consent-row">
+            <input type="checkbox" id="email-consent" required>
+            <label for="email-consent">I agree to receive marketing emails. You can <a href="/settings">unsubscribe</a> anytime.</label>
+          </div>
+          <button type="submit" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">Subscribe</button>
+        </form>
+        <div style="display:flex; gap:1rem; margin-top:1rem;">
+          <a href="https://github.com/caligym" aria-label="CaliGym on GitHub" style="color:var(--color-slate);">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+          <a href="https://twitter.com/caligym" aria-label="CaliGym on Twitter" style="color:var(--color-slate);">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>
+          </a>
+          <a href="https://youtube.com/@caligym" aria-label="CaliGym on YouTube" style="color:var(--color-slate);">
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:2rem; padding-top:1rem; border-top:1px solid #1e293b; text-align:center; color:var(--color-slate); font-size:0.8rem;">
+      &copy; 2026 CaliGym LLC. All rights reserved. Powered by evidence-based exercise science.
+    </div>
+  </div>
+</footer>
+
+<!-- ==================== COOKIE CONSENT BANNER ==================== -->
+<div class="cookie-banner" id="cookie-banner" style="display:none;">
+  <div style="max-width:900px; margin:0 auto; display:flex; flex-wrap:wrap; align-items:center; gap:1.5rem;">
+    <div style="flex:1; min-width:250px;">
+      <p style="font-size:0.9rem; margin-bottom:0.5rem;">We use cookies to improve your experience. Choose which cookies you allow.</p>
+      <div style="display:flex; flex-wrap:wrap; gap:1rem; font-size:0.85rem;">
+        <label style="display:flex; align-items:center; gap:0.3rem; color:var(--color-slate);">
+          <input type="checkbox" checked disabled> Functional (required)
+        </label>
+        <label style="display:flex; align-items:center; gap:0.3rem; color:var(--color-slate);">
+          <input type="checkbox" id="cookie-analytics"> Analytics
+        </label>
+        <label style="display:flex; align-items:center; gap:0.3rem; color:var(--color-slate);">
+          <input type="checkbox" id="cookie-marketing"> Marketing
+        </label>
+      </div>
+    </div>
+    <div style="display:flex; gap:0.75rem;">
+      <button class="btn btn-primary" style="padding:0.5rem 1.25rem; font-size:0.85rem;" onclick="acceptCookies()">Accept Selected</button>
+      <button class="btn btn-secondary" style="padding:0.5rem 1.25rem; font-size:0.85rem;" onclick="declineCookies()">Decline Optional</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script>
+// --- Age verification ---
+(function() {
+  if (localStorage.getItem('caligym_age_verified') === 'true') {
+    document.getElementById('age-modal').classList.add('hidden');
+  }
+})();
+function confirmAge() {
+  localStorage.setItem('caligym_age_verified', 'true');
+  document.getElementById('age-modal').classList.add('hidden');
+}
+
+// --- Cookie consent ---
+(function() {
+  if (!localStorage.getItem('caligym_cookie_consent')) {
+    document.getElementById('cookie-banner').style.display = 'block';
+  }
+})();
+function acceptCookies() {
+  var consent = {
+    functional: true,
+    analytics: document.getElementById('cookie-analytics').checked,
+    marketing: document.getElementById('cookie-marketing').checked,
+    timestamp: new Date().toISOString()
+  };
+  localStorage.setItem('caligym_cookie_consent', JSON.stringify(consent));
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+function declineCookies() {
+  var consent = { functional: true, analytics: false, marketing: false, timestamp: new Date().toISOString() };
+  localStorage.setItem('caligym_cookie_consent', JSON.stringify(consent));
+  document.getElementById('cookie-banner').style.display = 'none';
+}
+
+// --- Pricing toggle ---
+function setPricing(mode) {
+  var monthly = document.getElementById('toggle-monthly');
+  var annual = document.getElementById('toggle-annual');
+  var priceCoach = document.getElementById('price-coach');
+  var priceMaster = document.getElementById('price-master');
+  if (mode === 'monthly') {
+    monthly.classList.add('active');
+    annual.classList.remove('active');
+    priceCoach.innerHTML = '$9.99<span style="font-size:0.9rem; color:var(--color-slate); font-weight:400;">/mo</span>';
+    priceMaster.innerHTML = '$19.99<span style="font-size:0.9rem; color:var(--color-slate); font-weight:400;">/mo</span>';
+  } else {
+    annual.classList.add('active');
+    monthly.classList.remove('active');
+    priceCoach.innerHTML = '$7.99<span style="font-size:0.9rem; color:var(--color-slate); font-weight:400;">/mo</span><span style="display:block; font-size:0.8rem; color:var(--color-emerald); font-weight:400;">Billed $95.88/year (save 20%)</span>';
+    priceMaster.innerHTML = '$15.99<span style="font-size:0.9rem; color:var(--color-slate); font-weight:400;">/mo</span><span style="display:block; font-size:0.8rem; color:var(--color-emerald); font-weight:400;">Billed $191.88/year (save 20%)</span>';
+  }
+}
+
+// --- FAQ accordion ---
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  var icon = btn.querySelector('span');
+  var isOpen = answer.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.faq-answer').forEach(function(a) { a.classList.remove('open'); });
+  document.querySelectorAll('.faq-question span').forEach(function(s) { s.textContent = '+'; s.style.transform = 'rotate(0)'; });
+  document.querySelectorAll('.faq-question').forEach(function(q) { q.setAttribute('aria-expanded', 'false'); });
+  // Toggle current
+  if (!isOpen) {
+    answer.classList.add('open');
+    icon.textContent = '−';
+    icon.style.transform = 'rotate(180deg)';
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+// --- Comparison table ---
+function toggleComparison() {
+  document.getElementById('comparison-table').classList.toggle('open');
+}
+
+// --- Email signup ---
+function handleEmailSignup(e) {
+  e.preventDefault();
+  alert('Thank you for subscribing! Check your inbox for a confirmation email.');
+}
+</script>
+
+</body>
+</html>
